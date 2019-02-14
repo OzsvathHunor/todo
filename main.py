@@ -1,7 +1,10 @@
 #!/usr/bin/env python
+#-*- coding: utf-8-*-
+
 import os
 import jinja2
 import webapp2
+from models import Todo
 
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -29,7 +32,15 @@ class BaseHandler(webapp2.RequestHandler):
 
 class MainHandler(BaseHandler):
     def get(self):
-        return self.render_template("hello.html")
+        todos = Todo.query().fetch()
+        return self.render_template("hello.html", params={"todos": todos})
+
+    def post(self):
+        new_todo_text = self.request.get("todo")
+        new_todo = Todo(task=new_todo_text)
+        new_todo.put()
+        return self.redirect("/")
+
 
 app = webapp2.WSGIApplication([
     webapp2.Route('/', MainHandler),
